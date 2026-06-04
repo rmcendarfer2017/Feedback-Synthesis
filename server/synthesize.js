@@ -70,7 +70,7 @@ function buildUserPrompt(notes, vaultName) {
   return `Synthesize the following ${notes.length} feedback notes for the "${vaultName}" feature.\n\n${noteBlocks}`;
 }
 
-export async function synthesize(notes, vaultName, apiKey, onChunk) {
+export async function synthesize(notes, vaultName, apiKey, model, onChunk) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -79,7 +79,7 @@ export async function synthesize(notes, vaultName, apiKey, onChunk) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model,
       max_tokens: 4096,
       stream: true,
       system: SYNTHESIS_SYSTEM_PROMPT,

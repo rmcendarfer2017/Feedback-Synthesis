@@ -14,6 +14,8 @@ import {
   saveSetup,
   looksLikeApiKey,
   testApiKey,
+  AVAILABLE_MODELS,
+  DEFAULT_MODEL,
 } from './config.js';
 import { localDevCorsOptions } from './cors.js';
 
@@ -31,7 +33,7 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/setup', async (_req, res) => {
   try {
     const status = await getSetupStatus(scanVaults);
-    res.json(status);
+    res.json({ ...status, availableModels: AVAILABLE_MODELS });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -40,7 +42,7 @@ app.get('/api/setup', async (_req, res) => {
 // POST /api/setup — save API key and/or vault root to .env
 app.post('/api/setup', async (req, res) => {
   try {
-    const { apiKey, vaultRoot } = req.body ?? {};
+    const { apiKey, vaultRoot, model } = req.body ?? {};
 
     if (apiKey !== undefined && !looksLikeApiKey(apiKey)) {
       return res.status(400).json({
@@ -52,9 +54,13 @@ app.post('/api/setup', async (req, res) => {
       return res.status(400).json({ error: 'Vault folder path cannot be empty.' });
     }
 
-    await saveSetup({ apiKey, vaultRoot });
+    if (model !== undefined && !AVAILABLE_MODELS.find((m) => m.id === model)) {
+      return res.status(400).json({ error: 'Invalid model selection.' });
+    }
+
+    await saveSetup({ apiKey, vaultRoot, model });
     const status = await getSetupStatus(scanVaults);
-    res.json(status);
+    res.json({ ...status, availableModels: AVAILABLE_MODELS });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -183,7 +189,8 @@ app.post('/api/synthesize', async (req, res) => {
       return res.end();
     }
 
-    await synthesize(notes, vaultName, apiKey, (chunk) => {
+    const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+    await synthesize(notes, vaultName, apiKey, model, (chunk) => {
       res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
     });
 

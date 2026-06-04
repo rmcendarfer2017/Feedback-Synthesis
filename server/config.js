@@ -54,7 +54,15 @@ export async function readEnvFile() {
   }
 }
 
-export async function saveSetup({ apiKey, vaultRoot }) {
+export const AVAILABLE_MODELS = [
+  { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', description: 'Recommended — fast and capable' },
+  { id: 'claude-opus-4-8', label: 'Claude Opus 4.8', description: 'Most capable, slower' },
+  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5', description: 'Fastest, most economical' },
+];
+
+export const DEFAULT_MODEL = 'claude-sonnet-4-6';
+
+export async function saveSetup({ apiKey, vaultRoot, model }) {
   const existing = await readEnvFile();
   const next = { ...existing };
 
@@ -64,11 +72,15 @@ export async function saveSetup({ apiKey, vaultRoot }) {
   if (vaultRoot !== undefined) {
     next.VAULT_ROOT = vaultRoot.trim();
   }
+  if (model !== undefined) {
+    next.ANTHROPIC_MODEL = model.trim();
+  }
 
   const lines = [
     '# Feedback Synthesis — local configuration',
     `ANTHROPIC_API_KEY=${next.ANTHROPIC_API_KEY ?? ''}`,
     `VAULT_ROOT=${next.VAULT_ROOT ?? ''}`,
+    `ANTHROPIC_MODEL=${next.ANTHROPIC_MODEL ?? DEFAULT_MODEL}`,
   ];
 
   await fs.writeFile(ENV_PATH, lines.join('\n') + '\n', 'utf-8');
@@ -100,6 +112,7 @@ export async function getSetupStatus(scanVaults) {
   }
 
   const ready = apiKeySet && vaultRootSet && vaultRootValid;
+  const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
 
   return {
     ready,
@@ -111,6 +124,7 @@ export async function getSetupStatus(scanVaults) {
     vaults,
     sampleVaultPath: SAMPLE_VAULTS_PATH,
     apiKeyHint: apiKeySet ? `…${apiKey.slice(-4)}` : null,
+    model,
   };
 }
 

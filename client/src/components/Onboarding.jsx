@@ -15,6 +15,7 @@ export default function Onboarding({ status, onComplete, isSettings }) {
   const [step, setStep] = useState(startStep);
   const [apiKey, setApiKey] = useState('');
   const [vaultRoot, setVaultRoot] = useState(status?.vaultRoot || '');
+  const [model, setModel] = useState(status?.model || '');
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState(null);
@@ -54,8 +55,11 @@ export default function Onboarding({ status, onComplete, isSettings }) {
       setError('Paste your Anthropic API key to continue.');
       return;
     }
-    if (apiKey.trim()) {
-      const saved = await savePartial({ apiKey: apiKey.trim() });
+    const body = {};
+    if (apiKey.trim()) body.apiKey = apiKey.trim();
+    if (model) body.model = model;
+    if (Object.keys(body).length > 0) {
+      const saved = await savePartial(body);
       if (!saved) return;
       setApiKey('');
     }
@@ -195,6 +199,22 @@ export default function Onboarding({ status, onComplete, isSettings }) {
               >
                 {testing ? 'Testing…' : 'Test connection'}
               </button>
+
+              <label className="onboarding-label" htmlFor="model-select" style={{ marginTop: 20 }}>
+                Claude model
+              </label>
+              <select
+                id="model-select"
+                className="onboarding-input"
+                value={model || preview?.model || ''}
+                onChange={(e) => setModel(e.target.value)}
+              >
+                {(preview?.availableModels ?? []).map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label} — {m.description}
+                  </option>
+                ))}
+              </select>
             </>
           )}
 

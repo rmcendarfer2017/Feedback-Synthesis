@@ -33,7 +33,7 @@ export default function FilterBar({
     onFiltersChange({});
   }
 
-  const hasFilters = filters.source || filters.from || filters.to || filters.tags;
+  const hasFilters = filters.tags;
 
   return (
     <div className="filter-bar">
@@ -60,38 +60,6 @@ export default function FilterBar({
             </div>
           )}
         </div>
-
-        <select
-          value={filters.source || ''}
-          onChange={(e) => update('source', e.target.value)}
-          style={{ width: 148 }}
-          disabled={!vault}
-        >
-          <option value="">All sources</option>
-          <option value="user-interview">User interviews</option>
-          <option value="nps">NPS</option>
-          <option value="support-ticket">Support tickets</option>
-          <option value="sales-call">Sales calls</option>
-          <option value="survey">Surveys</option>
-        </select>
-
-        <input
-          type="date"
-          value={filters.from || ''}
-          onChange={(e) => update('from', e.target.value)}
-          disabled={!vault}
-          title="From date"
-          style={{ width: 138 }}
-        />
-
-        <input
-          type="date"
-          value={filters.to || ''}
-          onChange={(e) => update('to', e.target.value)}
-          disabled={!vault}
-          title="To date"
-          style={{ width: 138 }}
-        />
 
         {hasFilters && (
           <button type="button" className="filter-bar-clear" onClick={clearFilters} disabled={!vault}>
