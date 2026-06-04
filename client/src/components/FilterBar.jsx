@@ -33,7 +33,16 @@ export default function FilterBar({
     onFiltersChange({});
   }
 
-  const hasFilters = filters.tags;
+  const hasFilters = filters.tags || filters.source || filters.from || filters.to;
+
+  const SOURCES = [
+    { value: 'user-interview', label: 'User interview' },
+    { value: 'nps', label: 'NPS' },
+    { value: 'support-ticket', label: 'Support ticket' },
+    { value: 'sales-call', label: 'Sales call' },
+    { value: 'survey', label: 'Survey' },
+    { value: 'unknown', label: 'Unknown' },
+  ];
 
   return (
     <div className="filter-bar">
@@ -61,6 +70,39 @@ export default function FilterBar({
           )}
         </div>
 
+        <select
+          className="filter-bar-select"
+          value={filters.source || ''}
+          onChange={(e) => update('source', e.target.value)}
+          disabled={!vault}
+          title="Filter by feedback source"
+        >
+          <option value="">All sources</option>
+          {SOURCES.map(({ value, label }) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+
+        {vault && (
+          <div className="filter-bar-dates">
+            <input
+              type="date"
+              className="filter-bar-date-input"
+              value={filters.from || ''}
+              onChange={(e) => update('from', e.target.value)}
+              title="From date"
+            />
+            <span style={{ fontSize: 11, color: 'var(--text3)' }}>to</span>
+            <input
+              type="date"
+              className="filter-bar-date-input"
+              value={filters.to || ''}
+              onChange={(e) => update('to', e.target.value)}
+              title="To date"
+            />
+          </div>
+        )}
+
         {hasFilters && (
           <button type="button" className="filter-bar-clear" onClick={clearFilters} disabled={!vault}>
             Clear filters
@@ -79,24 +121,26 @@ export default function FilterBar({
       </div>
 
       {vault && vaultTags.length > 0 && (
-        <div className="filter-bar-tags" title="Show notes that have any selected tag">
-          <span className="filter-bar-tags-label">Tags</span>
-          <div className="filter-bar-tags-list">
-            {vaultTags.map(({ name, count }) => {
-              const active = activeTags.includes(name);
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  className={`filter-tag${active ? ' active' : ''}`}
-                  onClick={() => toggleTag(name)}
-                  title={`${count} note${count !== 1 ? 's' : ''}`}
-                >
-                  {name}
-                  <span className="filter-tag-count">{count}</span>
-                </button>
-              );
-            })}
+        <div className="filter-bar-secondary">
+          <div className="filter-bar-tags" title="Show notes that have any selected tag">
+            <span className="filter-bar-tags-label">Tags</span>
+            <div className="filter-bar-tags-list">
+              {vaultTags.map(({ name, count }) => {
+                const active = activeTags.includes(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    className={`filter-tag${active ? ' active' : ''}`}
+                    onClick={() => toggleTag(name)}
+                    title={`${count} note${count !== 1 ? 's' : ''}`}
+                  >
+                    {name}
+                    <span className="filter-tag-count">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

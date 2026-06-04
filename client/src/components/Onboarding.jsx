@@ -1,15 +1,16 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },
   { id: 'apiKey', label: 'API key' },
   { id: 'vault', label: 'Vaults' },
+  { id: 'structure', label: 'Note structure' },
   { id: 'done', label: 'Ready' },
 ];
 
 export default function Onboarding({ status, onComplete, isSettings }) {
   const startStep = isSettings
-    ? (status?.apiKeySet ? (status?.vaultRootSet ? 2 : 1) : 1)
+    ? (status?.apiKeySet ? 2 : 1)
     : 0;
 
   const [step, setStep] = useState(startStep);
@@ -222,7 +223,7 @@ export default function Onboarding({ status, onComplete, isSettings }) {
             <>
               <p>
                 Choose the <strong>parent folder</strong> that contains your vault subfolders —
-                not a single Obsidian vault’s inner <code>.obsidian</code> directory.
+                not a single Obsidian vault&apos;s inner <code>.obsidian</code> directory.
               </p>
               <div className="onboarding-callout">
                 Example: if notes live in <code>D:\Notes\ProductA</code> and{' '}
@@ -247,10 +248,63 @@ export default function Onboarding({ status, onComplete, isSettings }) {
                   Found {preview.vaultCount} vault{preview.vaultCount !== 1 ? 's' : ''} in this folder.
                 </p>
               )}
+
             </>
           )}
 
           {step === 3 && (
+            <>
+              <p>
+                Add a YAML frontmatter block to each note to unlock source filtering, date ranges, and tag filtering.
+              </p>
+
+              <div className="onboarding-structure-cols">
+                <div>
+                  <div className="onboarding-structure-label">Folder layout</div>
+                  <pre className="onboarding-code">{`feedback-vaults/     ← VAULT_ROOT
+├── q1-research/     ← vault
+│   ├── interview-a.md
+│   └── nps-march.md
+└── q2-research/     ← vault
+    └── interview-b.md`}</pre>
+                </div>
+
+                <div>
+                  <div className="onboarding-structure-label">Note frontmatter</div>
+                  <pre className="onboarding-code">{`---
+date: 2026-05-14
+source: user-interview
+sentiment: 2
+tags: [onboarding, mobile]
+participant: "SMB / 12 seats"
+---
+
+Note body — write freely.
+Claude reads this for themes
+and evidence quotes.`}</pre>
+                </div>
+              </div>
+
+              <table className="onboarding-field-table" style={{ marginTop: 14 }}>
+                <thead>
+                  <tr><th>Field</th><th>Accepted values</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>date</code></td><td>YYYY-MM-DD — enables date range filtering</td></tr>
+                  <tr><td><code>source</code></td><td><code>user-interview</code> · <code>nps</code> · <code>support-ticket</code> · <code>sales-call</code> · <code>survey</code></td></tr>
+                  <tr><td><code>sentiment</code></td><td>1 (very negative) → 5 (very positive)</td></tr>
+                  <tr><td><code>tags</code></td><td><code>[onboarding, pricing, mobile]</code></td></tr>
+                  <tr><td><code>participant</code></td><td>Free text — shown in evidence quotes</td></tr>
+                </tbody>
+              </table>
+
+              <p className="onboarding-hint" style={{ marginTop: 10 }}>
+                Notes without frontmatter are still included in synthesis — they just won&apos;t be filterable.
+              </p>
+            </>
+          )}
+
+          {step === 4 && (
             <>
               <p className="onboarding-done-title">You&apos;re set up</p>
               {(preview?.vaults?.length ?? 0) > 0 ? (
@@ -277,7 +331,7 @@ export default function Onboarding({ status, onComplete, isSettings }) {
         </div>
 
         <footer className="onboarding-footer">
-          {step > 0 && step < 3 && (
+          {step > 0 && step < 4 && (
             <button
               type="button"
               className="onboarding-btn-ghost"
@@ -288,7 +342,7 @@ export default function Onboarding({ status, onComplete, isSettings }) {
             </button>
           )}
           <div className="onboarding-footer-right">
-            {isSettings && step < 3 && (
+            {isSettings && step < 4 && (
               <button type="button" className="onboarding-btn-ghost" onClick={() => onComplete(preview)}>
                 Cancel
               </button>
@@ -319,6 +373,11 @@ export default function Onboarding({ status, onComplete, isSettings }) {
               </button>
             )}
             {step === 3 && (
+              <button type="button" className="onboarding-btn-primary" onClick={() => setStep(4)}>
+                Continue
+              </button>
+            )}
+            {step === 4 && (
               <button type="button" className="onboarding-btn-primary" onClick={handleFinish}>
                 {isSettings ? 'Save & close' : 'Open Feedback Synthesis'}
               </button>
