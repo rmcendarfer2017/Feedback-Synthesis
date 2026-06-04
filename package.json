@@ -1,0 +1,27 @@
+{
+  "name": "feedback-synthesis",
+  "version": "1.0.0",
+  "description": "Local PM feedback synthesis tool powered by Claude",
+  "type": "module",
+  "scripts": {
+    "server": "node server/index.js",
+    "client": "vite client --config client/vite.config.js",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-ports.ps1"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "concurrently": "^9.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "glob": "^11.0.0",
+    "gray-matter": "^4.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}
